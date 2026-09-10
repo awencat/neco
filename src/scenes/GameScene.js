@@ -65,9 +65,6 @@ class GameScene extends Phaser.Scene {
     /* ---- 输入 ---- */
     this.setupInput();
 
-    /* ---- 风筝线绘制层 ---- */
-    this.lineG = this.add.graphics().setDepth(8);
-
     /* ---- 开场 ---- */
     this.cameras.main.fadeIn(400);
     this.showBiomeTitle(this.biome.name);
@@ -237,28 +234,6 @@ class GameScene extends Phaser.Scene {
     else this.playerSprite.clearTint();
   }
 
-  /** 绘制风筝线（纯装饰） */
-  drawKiteLine() {
-    const g = this.lineG;
-    g.clear();
-    g.lineStyle(3, 0xffffff, 0.26);
-
-    const segs = 10;
-    const startX = this.playerX - 8;
-    const startY = this.playerY + 8;
-
-    g.beginPath();
-    g.moveTo(startX, startY);
-
-    for (let i = 1; i <= segs; i++) {
-      const t = i / segs;
-      const px = startX - t * 58 - Math.sin(this.windTime * 4 + t * 5) * 7;
-      const py = startY + t * 66;
-      g.lineTo(px, py);
-    }
-    g.strokePath();
-  }
-
   /* ---------------------------------------------------------------------
    *  实体更新 / 回收
    * ------------------------------------------------------------------- */
@@ -382,8 +357,6 @@ class GameScene extends Phaser.Scene {
   gameOver() {
     if (this.state === 'gameover') return;
     this.state = 'gameover';
-
-    if (this.lineG) this.lineG.clear();
 
     this.tweens.add({
       targets: this.playerSprite,
@@ -541,18 +514,28 @@ class GameScene extends Phaser.Scene {
     const bg = this.add.rectangle(GAME_W / 2, GAME_H / 2, GAME_W, GAME_H, 0x06121c, 0.62)
       .setDepth(300);
 
-    const t1 = this.add.text(GAME_W / 2, GAME_H / 2 - 20, '已暂停', {
+    const t1 = this.add.text(GAME_W / 2, GAME_H / 2 - 34, '已暂停', {
       fontFamily: '"Courier New", Consolas, monospace',
       fontSize: '54px', color: '#ffffff', fontStyle: 'bold',
       stroke: '#12314a', strokeThickness: 8,
     }).setOrigin(0.5).setDepth(301);
 
-    const t2 = this.add.text(GAME_W / 2, GAME_H / 2 + 42, '按 P 继续', {
+    const t2 = this.add.text(GAME_W / 2, GAME_H / 2 + 2, '按 P 继续', {
       fontFamily: '"Courier New", Consolas, monospace',
       fontSize: '22px', color: '#9fd8ff',
     }).setOrigin(0.5).setDepth(301);
 
-    this.pauseOverlay = this.add.container(0, 0, [bg, t1, t2])
+    const restart = makeButton(this, GAME_W / 2 - 110, GAME_H / 2 + 92, '重新开始', () => {
+      this.scene.stop('GameScene');
+      this.scene.start('GameScene', { character: this.charKey });
+    }, { width: 190, height: 58, color: 0x2e7d32, fontSize: '22px' });
+
+    const toMenu = makeButton(this, GAME_W / 2 + 110, GAME_H / 2 + 92, '返回主菜单', () => {
+      this.scene.stop('GameScene');
+      this.scene.start('MenuScene');
+    }, { width: 190, height: 58, color: 0x37474f, fontSize: '22px' });
+
+    this.pauseOverlay = this.add.container(0, 0, [bg, t1, t2, restart.bg, restart.txt, toMenu.bg, toMenu.txt])
       .setDepth(300).setVisible(false);
   }
 
@@ -575,6 +558,5 @@ class GameScene extends Phaser.Scene {
     this.checkCollisions();
     this.cleanupEntities();
     this.updateUI();
-    this.drawKiteLine();
   }
 }

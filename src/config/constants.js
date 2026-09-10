@@ -39,7 +39,7 @@ const TUNING = {
 
   /* ---------- 冲刺 ---------- */
   dash: {
-    cooldown: 2.0,            // 冷却时间（秒）
+    cooldown: 1.0,            // 冷却时间（秒）
     duration: 0.32,           // 冲刺持续时间（秒）
     speedMultiplier: 2.6,     // 冲刺期间卷轴速度倍率
     forwardOffset: 46,        // 冲刺时飞行器向右位移（视觉反馈）
